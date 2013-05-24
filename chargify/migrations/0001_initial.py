@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Customer'
         db.create_table('chargify_customer', (
             ('chargify_updated_at', self.gf('django.db.models.fields.DateTimeField')(null=True)),
@@ -17,6 +17,12 @@ class Migration(SchemaMigration):
             ('organization', self.gf('django.db.models.fields.CharField')(max_length=75, null=True, blank=True)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('chargify_id', self.gf('django.db.models.fields.IntegerField')(unique=True, null=True)),
+            ('_first_name', self.gf('django.db.models.fields.CharField')(max_length=75, null=True, blank=True)),
+            ('_last_name', self.gf('django.db.models.fields.CharField')(max_length=75, null=True, blank=True)),
+            ('_email', self.gf('django.db.models.fields.CharField')(max_length=75, null=True, blank=True)),
+            ('_reference', self.gf('django.db.models.fields.CharField')(max_length=75, null=True, blank=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
+
         ))
         db.send_create_signal('chargify', ['Customer'])
 
@@ -30,6 +36,7 @@ class Migration(SchemaMigration):
             ('accounting_code', self.gf('django.db.models.fields.CharField')(max_length=30, null=True)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('chargify_id', self.gf('django.db.models.fields.IntegerField')(unique=True, null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
         ))
         db.send_create_signal('chargify', ['Product'])
 
@@ -45,6 +52,9 @@ class Migration(SchemaMigration):
             ('type', self.gf('django.db.models.fields.CharField')(max_length=25, null=True)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('billing_state', self.gf('django.db.models.fields.CharField')(max_length=2, null=True)),
+            ('first_name', self.gf('django.db.models.fields.CharField')(max_length=2, null=True)),
+            ('last_name', self.gf('django.db.models.fields.CharField')(max_length=2, null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
         ))
         db.send_create_signal('chargify', ['CreditCard'])
 
@@ -65,12 +75,13 @@ class Migration(SchemaMigration):
             ('balance', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=15, decimal_places=2)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('chargify_id', self.gf('django.db.models.fields.IntegerField')(unique=True, null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
         ))
         db.send_create_signal('chargify', ['Subscription'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Customer'
         db.delete_table('chargify_customer')
 
@@ -82,8 +93,8 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Subscription'
         db.delete_table('chargify_subscription')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -174,5 +185,5 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         }
     }
-    
+
     complete_apps = ['chargify']
