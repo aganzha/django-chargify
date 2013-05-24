@@ -7,7 +7,7 @@ import traceback
 from django.conf import settings
 
 class Migration(DataMigration):
-    
+
     def forwards(self, orm):
         "Write your forwards methods here."
         from chargify.chargify_settings import CHARGIFY
@@ -30,17 +30,17 @@ class Migration(DataMigration):
             p.interval = product.interval
             products[product.handle] = product
             p.save()
-        
+
         try:
             Subscription.objects.update_all()
         except:
             print 'Failed to import chargify data! Please do so manually'
             traceback.print_exc()
-    
+
     def backwards(self, orm):
         "Write your backwards methods here."
         pass
-    
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -131,5 +131,5 @@ class Migration(DataMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         }
     }
-    
+
     complete_apps = ['chargify']
