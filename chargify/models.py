@@ -11,6 +11,7 @@ from django.conf import settings
 log = logging.getLogger("chargify")
 logging.basicConfig(level=logging.DEBUG)
 
+
 def unique_reference(prefix = ''):
     return '%s%i' %(prefix, time.time()*1000)
 
@@ -665,7 +666,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         """ Upgrade / Downgrade products """
         return self.update(self.api.upgrade(product.handle))
 
-    def load_api(self):
+    def _api(self):
         """ Load data into chargify api object """
         subscription = self.gateway.Subscription(node_name)
         if self.chargify_id:
