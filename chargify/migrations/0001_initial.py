@@ -36,6 +36,7 @@ class Migration(SchemaMigration):
             ('accounting_code', self.gf('django.db.models.fields.CharField')(max_length=30, null=True)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('chargify_id', self.gf('django.db.models.fields.IntegerField')(unique=True, null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
         ))
         db.send_create_signal('chargify', ['Product'])
 
@@ -51,6 +52,9 @@ class Migration(SchemaMigration):
             ('type', self.gf('django.db.models.fields.CharField')(max_length=25, null=True)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('billing_state', self.gf('django.db.models.fields.CharField')(max_length=2, null=True)),
+            ('first_name', self.gf('django.db.models.fields.CharField')(max_length=2, null=True)),
+            ('last_name', self.gf('django.db.models.fields.CharField')(max_length=2, null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
         ))
         db.send_create_signal('chargify', ['CreditCard'])
 
@@ -71,6 +75,7 @@ class Migration(SchemaMigration):
             ('balance', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=15, decimal_places=2)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('chargify_id', self.gf('django.db.models.fields.IntegerField')(unique=True, null=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
         ))
         db.send_create_signal('chargify', ['Subscription'])
 

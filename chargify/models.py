@@ -119,12 +119,13 @@ class Customer(models.Model, ChargifyBaseModel):
             return '%s %s' %(self.first_name, self.last_name)
 
     def __unicode__(self):
-        return self.full_name() + u' - ' + str(self.chargify_id )
+        return self.full_name() + u' - ' + str(self.chargify_id)
 
     def _get_first_name(self):
         if self._first_name is not None:
             return self._first_name
         return self.user.first_name
+
     def _set_first_name(self, first_name):
         if self.user.first_name != first_name:
             self._first_name = first_name
@@ -134,6 +135,7 @@ class Customer(models.Model, ChargifyBaseModel):
         if self._last_name is not None:
             return self._last_name
         return self.user.last_name
+
     def _set_last_name(self, last_name):
         if self.user.last_name != last_name:
             self._last_name = last_name
@@ -143,6 +145,7 @@ class Customer(models.Model, ChargifyBaseModel):
         if self._email is not None:
             return self._email
         return self.user.email
+
     def _set_email(self, email):
         if self.user.email != email:
             self._email = email
@@ -159,6 +162,7 @@ class Customer(models.Model, ChargifyBaseModel):
             return self.id
         else:
             return ''
+
     def _set_reference(self, reference):
         self._reference = str(reference)
     reference = property(_get_reference, _set_reference)
@@ -441,6 +445,7 @@ class SubscriptionManager(ChargifyBaseManager):
         """ You should only run this when you first install the product!
         VERY EXPENSIVE!!! """
         Product.objects.reload_all()
+        Customer.objects.reload_all()
         for customer in Customer.objects.filter(active=True):
             subscriptions = self.api.getByCustomerId(str(customer.chargify_id))
             if not subscriptions:
