@@ -32,21 +32,6 @@ class CustomerAdmin(admin.ModelAdmin):
 
 admin.site.register(Customer, CustomerAdmin)
 
-class ComponentInFamily(admin.StackedInline):
-    model = Component
-    extra = 1
-
-class ProductFamilyAdmin(admin.ModelAdmin):
-    inlines = [ComponentInFamily, ]
-    list_display = ['name', 'chargify_id', 'handle', 'accounting_code', 'description']
-    ordering = ['name']
-    actions = [update, 'reload_all_product_families']
-
-    def reload_all_product_families(self, request, queryset):
-        return reload_all(self, request, queryset, ProductFamily)
-
-admin.site.register(ProductFamily, ProductFamilyAdmin)
-
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'price', 'chargify_id', 'handle', 'accounting_code', 'product_family', 'active']
     ordering = ['name']
@@ -57,12 +42,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 admin.site.register(Product, ProductAdmin)
 
-class ComponentInSubscription(admin.StackedInline):
-    model = SubscriptionComponent
-    extra = 1
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    inlines = [ComponentInSubscription, ]
     list_display = ['customer', 'product', 'chargify_id', 'balance', 'current_period_started_at', 'trial_started_at', 'active']
     ordering = ['customer']
     actions = [update, 'reload_all_subscriptions']

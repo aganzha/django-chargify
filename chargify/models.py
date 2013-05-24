@@ -9,7 +9,7 @@ import time
 import traceback
 from django.conf import settings
 log = logging.getLogger("chargify")
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 
 def unique_reference(prefix = ''):
