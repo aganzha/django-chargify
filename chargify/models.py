@@ -15,28 +15,28 @@ def unique_reference(prefix = ''):
     return '%s%i' %(prefix, time.time()*1000)
 
 class ChargifyBaseModel(object):
-    """ You can change the gateway/subdomain used by 
+    """ You can change the gateway/subdomain used by
     changing the gateway on an instantiated object """
     gateway = CHARGIFY
-    
+
     def _api(self):
         raise NotImplementedError()
     api = property(_api)
-    
+
     def _from_cents(self, value):
         return Decimal(str(float(value)/float(100)))
-    
+
     def _in_cents(self, value):
         return Decimal(str(float(value)*float(100)))
-    
+
     def update(self):
         raise NotImplementedError()
-    
+
     def disable(self, commit=True):
         self.active = False
         if commit:
             self.save()
-    
+
     def enable(self, commit=True):
         self.active = True
         if commit:
@@ -46,15 +46,15 @@ class ChargifyBaseManager(models.Manager):
     def _gateway(self):
         return self.model.gateway
     gateway = property(_gateway)
-    
+
     def _api(self):
         raise NotImplementedError()
     api = property(_api)
-    
+
     def _check_api(self):
         if self.api is None:
             raise ValueError('Blank API Not Set on Manager')
-    
+
     def get_or_load(self, chargify_id):
         self._check_api()
         val = None
@@ -70,14 +70,14 @@ class ChargifyBaseManager(models.Manager):
                 val = self.model().load(api)
                 loaded = True
         return val, loaded
-    
+
     def load_and_update(self, chargify_id):
         self._check_api()
         val, loaded = self.get_or_load(chargify_id)
         if not loaded:
             val.update()
         return val
-    
+
     def reload_all(self):
         self._check_api()
         items = self.api.getAll()
@@ -105,22 +105,22 @@ class Customer(models.Model, ChargifyBaseModel):
     _reference = models.CharField(max_length = 50, null=True, blank=True)
     organization = models.CharField(max_length = 75, null=True, blank=True)
     active = models.BooleanField(default=True)
-    
+
     # Read only chargify fields
     chargify_created_at = models.DateTimeField(null=True)
     chargify_updated_at = models.DateTimeField(null=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CustomerManager()
-    
+
     def full_name(self):
         if not self.last_name:
             return self.first_name
         else:
             return '%s %s' %(self.first_name, self.last_name)
-    
+
     def __unicode__(self):
         return self.full_name() + u' - ' + str(self.chargify_id )
-    
+
     def _get_first_name(self):
         if self._first_name is not None:
             return self._first_name
@@ -129,7 +129,7 @@ class Customer(models.Model, ChargifyBaseModel):
         if self.user.first_name != first_name:
             self._first_name = first_name
     first_name = property(_get_first_name, _set_first_name)
-    
+
     def _get_last_name(self):
         if self._last_name is not None:
             return self._last_name
@@ -138,7 +138,7 @@ class Customer(models.Model, ChargifyBaseModel):
         if self.user.last_name != last_name:
             self._last_name = last_name
     last_name = property(_get_last_name, _set_last_name)
-    
+
     def _get_email(self):
         if self._email is not None:
             return self._email
@@ -147,12 +147,12 @@ class Customer(models.Model, ChargifyBaseModel):
         if self.user.email != email:
             self._email = email
     email = property(_get_email, _set_email)
-    
+
     def _get_reference(self):
         """ You must save the customer before you can get the reference number"""
         if getattr(settings, 'TESTING', False) and not self._reference:
             self._reference = unique_reference()
-        
+
         if self._reference:
             return self._reference
         elif self.id:
@@ -162,7 +162,7 @@ class Customer(models.Model, ChargifyBaseModel):
     def _set_reference(self, reference):
         self._reference = str(reference)
     reference = property(_get_reference, _set_reference)
-    
+
     def save(self, save_api = False, **kwargs):
         if save_api:
             if not self.id:
@@ -176,7 +176,7 @@ class Customer(models.Model, ChargifyBaseModel):
                 api = self.api
                 api.id = None
                 saved, customer = api.save()
-            
+
             if saved:
                 log.debug("Customer Saved")
                 return self.load(customer, commit=True) # object save happens after load
@@ -185,7 +185,7 @@ class Customer(models.Model, ChargifyBaseModel):
                 log.debug(customer)
         self.user.save()
         return super(Customer, self).save(**kwargs)
-    
+
     def load(self, api, commit=True):
         if self.id or self.chargify_id:# api.modified_at > self.chargify_updated_at:
             customer = self
@@ -214,12 +214,12 @@ class Customer(models.Model, ChargifyBaseModel):
         if commit:
             customer.save()
         return customer
-    
+
     def update(self, commit = True):
         """ Update customer data from chargify """
         api = self.api.getById(self.chargify_id)
         return self.load(api, commit)
-    
+
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
         customer = self.gateway.Customer(node_name)
@@ -236,7 +236,7 @@ class ProductManager(ChargifyBaseManager):
     def _api(self):
         return self.gateway.Product()
     api = property(_api)
-    
+
     def reload_all(self):
         products = {}
         for product in self.gateway.Product().getAll():
@@ -267,20 +267,20 @@ class Product(models.Model, ChargifyBaseModel):
     interval = models.IntegerField(default=1)
     active = models.BooleanField(default=True)
     objects = ProductManager()
-    
+
     def __unicode__(self):
         return self.name
-    
+
     def _price_in_cents(self):
         return self._in_cents(self.price)
     def _set_price_in_cents(self, price):
         self.price = self._from_cents(price)
     price_in_cents = property(_price_in_cents, _set_price_in_cents)
-    
+
     def _set_handle(self, handle):
         self.handle = str(handle)
     product_handle = property(handle, _set_handle)
-    
+
     def save(self, save_api = False, **kwargs):
         if save_api:
             try:
@@ -291,7 +291,7 @@ class Product(models.Model, ChargifyBaseModel):
                 pass
 #        self.api.save()
         return super(Product, self).save(**kwargs)
-    
+
     def load(self, api, commit=True):
         self.chargify_id = int(api.id)
         self.price_in_cents = api.price_in_cents
@@ -304,12 +304,12 @@ class Product(models.Model, ChargifyBaseModel):
         if commit:
             self.save()
         return self
-    
+
     def update(self, commit = True):
         """ Update customer data from chargify """
         api = self.api.getById(self.chargify_id)
         return self.load(api, commit = True)
-    
+
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
         product = self.gateway.Product(node_name)
@@ -334,7 +334,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
     CC_TYPES = CHARGIFY_CC_TYPES
     _full_number = ''
     ccv = ''
-    
+
     first_name = models.CharField(max_length = 50, null=True, blank=False)
     last_name = models.CharField(max_length = 50, null=True, blank=False)
     masked_card_number = models.CharField(max_length=25, null=True)
@@ -348,7 +348,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
     billing_country = models.CharField(max_length=75, null=True, blank=True, default='United States')
     active = models.BooleanField(default=True)
     objects = CreditCardManager()
-    
+
     def __unicode__(self):
         s = u''
         if self.first_name:
@@ -362,7 +362,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
                 s += u'-'
             s += unicode(self.masked_card_number)
         return s
-    
+
     # you have to set the customer if there is no related subscription yet
     _customer = None
     def _get_customer(self):
@@ -375,23 +375,23 @@ class CreditCard(models.Model, ChargifyBaseModel):
     def _set_customer(self, customer):
         self._customer = customer
     customer = property(_get_customer, _set_customer)
-    
+
     def _get_full_number(self):
         return self._full_number
     def _set_full_number(self, full_number):
         self._full_number = full_number
-        
+
         if len(full_number) > 4:
             self.masked_card_number = u'XXXX-XXXX-XXXX-' + full_number[-4:]
         else: #not a real CC number, probably a testing number
             self.masked_card_number = u'XXXX-XXXX-XXXX-1111'
     full_number = property(_get_full_number, _set_full_number)
-    
+
     def save(self,  save_api = False, *args, **kwargs):
         if save_api:
             self.api.save()
         return super(CreditCard, self).save(*args, **kwargs)
-    
+
     def load(self, api, commit=True):
         if api is None:
             return self
@@ -402,14 +402,14 @@ class CreditCard(models.Model, ChargifyBaseModel):
         if commit:
             self.save(save_api = False)
         return self
-    
+
     def update(self, commit=True):
         """ Update Credit Card data from chargify """
         if self.subscription:
             return self.subscription.update()
         else:
             return self
-    
+
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
         cc = self.gateway.CreditCard(node_name)
@@ -431,13 +431,13 @@ class SubscriptionManager(ChargifyBaseManager):
     def _api(self):
         return self.gateway.Subscription()
     api = property(_api)
-    
+
     def update_list(self, lst):
         for id in lst:
             sub= self.load_and_update(id)
             sub.save()
-    
-    def reload_all(self):
+
+    def update_all(self):
         """ You should only run this when you first install the product!
         VERY EXPENSIVE!!! """
         Product.objects.reload_all()
@@ -488,26 +488,26 @@ class Subscription(models.Model, ChargifyBaseModel):
     credit_card = models.OneToOneField(CreditCard, related_name='subscription', null=True, blank=True)
     active = models.BooleanField(default=True)
     objects = SubscriptionManager()
-    
+
     def __unicode__(self):
         s = unicode(self.get_state_display())
         if self.product:
             s += u' ' + self.product.name
         if self.chargify_id:
             s += ' - ' + unicode(self.chargify_id)
-        
+
         return s
-    
+
     def _balance_in_cents(self):
         return self._in_cents(self.balance)
     def _set_balance_in_cents(self, value):
         self.balance = self._from_cents(value)
     balance_in_cents = property(_balance_in_cents, _set_balance_in_cents)
-    
+
     def _product_handle(self):
         return self.product.handle
     product_handle = property(_product_handle)
-    
+
     def save(self, save_api = False, *args, **kwargs):
         if self.chargify_id is None:
             save_api = True
@@ -530,7 +530,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             if saved:
                 return self.load(subscription, commit=True) # object save happens after load
         return super(Subscription, self).save(*args, **kwargs)
-    
+
     def load(self, api, commit=True):
         self.chargify_id = int(api.id)
         self.state = api.state
@@ -561,7 +561,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             c = Customer()
             c.load(api.customer)
         self.customer = c
-        
+
         try:
             p = Product.objects.get(chargify_id = api.product.id)
         except:
@@ -569,7 +569,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             p.load(api.product)
             p.save()
         self.product = p
-        
+
         if self.credit_card:
             credit_card = self.credit_card
         else:
@@ -578,20 +578,20 @@ class Subscription(models.Model, ChargifyBaseModel):
         if commit:
             self.save()
         return self
-    
+
     def update(self, commit=True):
         """ Update Subscription data from chargify """
         subscriptions = self.gateway.Subscription().getBySubscriptionId(self.chargify_id)
-        
+
         if len(subscriptions) > 0:
             return self.load(subscriptions[0], commit)
         else:
             return None
-    
+
     def upgrade(self, product):
         """ Upgrade / Downgrade products """
         return self.update(self.api.upgrade(product.handle))
-    
+
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
         subscription = self.gateway.Subscription(node_name)
