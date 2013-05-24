@@ -235,7 +235,7 @@ class Customer(models.Model, ChargifyBaseModel):
         api = self.api.getById(self.chargify_id)
         return self.load(api, commit)
 
-    def _api(self, nodename=None):
+    def _api(self, node_name=None):
         """ Load data into chargify api object """
         customer = self.gateway.Customer(node_name)
         customer.id = str(self.chargify_id)
