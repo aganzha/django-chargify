@@ -210,7 +210,10 @@ class ChargifyBase(object):
                                 node.appendChild(child)
                         element.appendChild(node)
                     else:
-                        element.appendChild(value._toxml(dom))
+                        try:
+                            element.appendChild(value._toxml(dom))
+                        except:
+                            pass
                 else:
                     node = minidom.Element(property)
                     node_txt = dom.createTextNode(str(value).encode('ascii', 'xmlcharrefreplace'))
@@ -285,6 +288,8 @@ class ChargifyBase(object):
 
         # Unprocessable Entity Error
         elif response.status == 422:
+            print data
+            print r
             raise ChargifyUnProcessableEntity()
 
         # Generic Server Errors
@@ -392,7 +397,7 @@ class ChargifyCustomer(ChargifyBase):
 
     __name__ = 'ChargifyCustomer'
     __attribute_types__ = {}
-    __xmlnodename__ = 'customer'
+    __xmlnodename__ = 'customer_attributes'
 
     id = None
     first_name = ''
@@ -411,6 +416,17 @@ class ChargifyCustomer(ChargifyBase):
         obj = ChargifySubscription(self.api_key, self.sub_domain)
         return obj.getByCustomerId(self.id)
 
+    def _toxml(self, dom):
+        """
+        Return a XML Representation of the object
+        """
+        if self.id:
+            element = minidom.Element("customer_id")
+            node_txt = dom.createTextNode(str(self.id))
+            element.appendChild(node_txt)
+            return element
+        else:
+            return super(ChargifyCustomer, self)._to_xml(dom)
 
 class CustomerAttributes(ChargifyCustomer):
     __xmlnodename__ = 'customer_attributes'

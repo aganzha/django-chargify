@@ -237,7 +237,7 @@ class Customer(models.Model, ChargifyBaseModel):
 
     def _api(self, node_name=None):
         """ Load data into chargify api object """
-        customer = self.gateway.Customer(node_name)
+        customer = self.gateway.Customer()
         customer.id = str(self.chargify_id)
         customer.first_name = str(self.first_name)
         customer.last_name = str(self.last_name)
@@ -276,7 +276,7 @@ class Product(models.Model, ChargifyBaseModel):
     price = models.DecimalField(decimal_places = 2, max_digits = 15, default=Decimal('0.00'))
     name = models.CharField(max_length=75)
     handle = models.CharField(max_length=75, default='')
-    product_family = {}
+    product_family = models.CharField(max_length=75, default='')
     accounting_code = models.CharField(max_length=30, null=True)
     interval_unit = models.CharField(max_length=10, choices = INTERVAL_TYPES, default=MONTH)
     interval = models.IntegerField(default=1)
@@ -335,7 +335,7 @@ class Product(models.Model, ChargifyBaseModel):
 
     def _api(self):
         """ Load data into chargify api object """
-        product = self.gateway.Product(node_name)
+        product = self.gateway.Product()
         product.id = str(self.chargify_id)
         product.price_in_cents = self.price_in_cents
         product.name = self.name
@@ -440,7 +440,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
 
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
-        cc = self.gateway.CreditCard(node_name)
+        cc = self.gateway.CreditCard()
         cc.first_name = self.first_name
         cc.last_name = self.last_name
         cc.full_number = self._full_number
@@ -668,7 +668,7 @@ class Subscription(models.Model, ChargifyBaseModel):
 
     def _api(self):
         """ Load data into chargify api object """
-        subscription = self.gateway.Subscription(node_name)
+        subscription = self.gateway.Subscription()
         if self.chargify_id:
             subscription.id = str(self.chargify_id)
         subscription.product = self.product.api

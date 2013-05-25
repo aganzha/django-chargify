@@ -34,6 +34,7 @@ class Migration(SchemaMigration):
             ('price', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=15, decimal_places=2)),
             ('interval', self.gf('django.db.models.fields.IntegerField')(default=1)),
             ('accounting_code', self.gf('django.db.models.fields.CharField')(max_length=30, null=True)),
+            ('product_family', self.gf('django.db.models.fields.CharField')(max_length=30, null=True)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('chargify_id', self.gf('django.db.models.fields.IntegerField')(unique=True, null=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(max_length=75, null=True, blank=True)),
