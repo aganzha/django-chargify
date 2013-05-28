@@ -170,8 +170,9 @@ class ChargifyBase(object):
         Decodes and re-encodes with xml characters.
         Strips out whitespace "text nodes".
         """
-        return unicode(''.join([i.strip() for i in xml.split('\n')])
-                .encode('utf-8', 'xmlcharrefreplace'), 'utf-8')
+        return unicode(''.join([i.strip() for i in xml.split('\n')],
+                               errors='ignore')
+                       .encode('utf-8', 'xmlcharrefreplace'), 'utf-8')
 
     def _applyS(self, xml, obj_type, node_name):
         """
