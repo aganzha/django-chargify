@@ -1,4 +1,5 @@
 from chargify_settings import CHARGIFY, CHARGIFY_CC_TYPES
+from datetime import datetime
 from decimal import Decimal
 from django.contrib.auth.models import User
 from django.db import models
@@ -496,6 +497,11 @@ class SubscriptionManager(ChargifyBaseManager):
                     sub = self.get(chargify_id = subscription.id)
                 except:
                     sub = self.model()
+                    if not subscription.current_period_started_at:
+                        subscription.current_period_started_at = datetime.now()
+                    if not subscription.current_period_ends_at:
+                        subscription.current_period_ends_at = datetime.now()
+
                     sub.load(subscription)
                 sub.save()
 
