@@ -277,7 +277,7 @@ class Product(models.Model, ChargifyBaseModel):
     name = models.CharField(max_length=75)
     handle = models.CharField(max_length=75, default='')
     product_family = models.CharField(max_length=75, default='')
-    accounting_code = models.CharField(max_length=30, null=True)
+    accounting_code = models.CharField(max_length=300, null=True)
     interval_unit = models.CharField(max_length=10, choices = INTERVAL_TYPES, default=MONTH)
     interval = models.IntegerField(default=1)
     active = models.BooleanField(default=True)
