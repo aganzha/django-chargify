@@ -398,7 +398,7 @@ class ChargifyCustomer(ChargifyBase):
 
     __name__ = 'ChargifyCustomer'
     __attribute_types__ = {}
-    __xmlnodename__ = 'customer_attributes'
+    __xmlnodename__ = 'customer'
 
     id = None
     first_name = ''
@@ -427,7 +427,7 @@ class ChargifyCustomer(ChargifyBase):
             element.appendChild(node_txt)
             return element
         else:
-            return super(ChargifyCustomer, self)._to_xml(dom)
+            return super(ChargifyCustomer, self)._toxml(dom)
 
 class CustomerAttributes(ChargifyCustomer):
     __xmlnodename__ = 'customer_attributes'
