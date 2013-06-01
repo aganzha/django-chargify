@@ -421,7 +421,7 @@ class ChargifyCustomer(ChargifyBase):
         """
         Return a XML Representation of the object
         """
-        if self.id:
+        if self.id not in [None, 'None']:
             element = minidom.Element("customer_id")
             node_txt = dom.createTextNode(str(self.id))
             element.appendChild(node_txt)
@@ -571,7 +571,7 @@ class ChargifySubscription(ChargifyBase):
         """
         Gets the subscription components
         """
-        if self.id is not None:
+        if self.id not in [None, 'None']:
             obj = ChargifySubscriptionComponent(self.api_key, self.sub_domain)
             return obj.getBySubscriptionId(self.id)
 
