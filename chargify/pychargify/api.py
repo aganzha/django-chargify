@@ -551,6 +551,7 @@ class ChargifySubscription(ChargifyBase):
 
     id = None
     state = ''
+    coupon_code = ''
     balance_in_cents = 0
     current_period_started_at = None
     current_period_ends_at = None

@@ -526,6 +526,7 @@ class Subscription(models.Model, ChargifyBaseModel):
          )
     chargify_id = models.IntegerField(null=True, blank=True, unique=True)
     state = models.CharField(max_length=15, null=True, blank=True, default='', choices=STATE_CHOICES)
+    coupon_code = models.CharField(max_length=256, null=True, blank=True, default='')
     balance = models.DecimalField(decimal_places = 2, max_digits = 15, default=Decimal('0.00'))
     current_period_started_at = models.DateTimeField(null=True, blank=True)
     current_period_ends_at = models.DateTimeField(null=True, blank=True)
@@ -611,6 +612,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         self.chargify_id = int(api.id)
         self.state = api.state
         self.balance_in_cents = api.balance_in_cents
+        self.coupon_code = api.coupon_code
         self.current_period_started_at = new_datetime(api.current_period_started_at)
         self.current_period_ends_at = new_datetime(api.current_period_ends_at)
         if api.trial_started_at:
@@ -679,6 +681,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             subscription.id = str(self.chargify_id)
         subscription.product = self.product.api
         subscription.product_handle = self.product_handle
+        subscription.coupon_code = self.coupon_code
         if self.customer.chargify_id is None:
             subscription.customer = self.customer._api('customer_attributes')
         else:
