@@ -71,6 +71,7 @@ class Migration(SchemaMigration):
             ('trial_started_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('credit_card', self.gf('django.db.models.fields.related.ForeignKey')(related_name='subscription', null=True, to=orm['chargify.CreditCard'])),
             ('state', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
+            ('coupon_code', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
             ('expires_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('current_period_ends_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('balance', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=15, decimal_places=2)),
