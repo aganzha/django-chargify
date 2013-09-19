@@ -198,6 +198,7 @@ class ChargifyBase(object):
         """
         Return a XML Representation of the object
         """
+        log.debug("Converting element to xml....")
         element = minidom.Element(self.__xmlnodename__)
         for property, value in self.__dict__.iteritems():
             if not property in self.__ignore__ and not inspect.isfunction(value):
