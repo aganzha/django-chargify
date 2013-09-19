@@ -583,6 +583,7 @@ class Subscription(models.Model, ChargifyBaseModel):
                 self.product = product
             api = self.api
             log.debug('Saving API')
+            log.debug("Coupon code in chargify/models.py: %s" % self.coupon_code)
             saved, subscription = api.save()
             if saved:
                 return self.load(subscription, commit=True) # object save happens after load
@@ -682,6 +683,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         subscription.product = self.product.api
         subscription.product_handle = self.product_handle
         subscription.coupon_code = self.coupon_code
+        log.debug("Coupon code in _api: %s" % subscription.coupon_code)
         if self.customer.chargify_id is None:
             subscription.customer = self.customer._api('customer_attributes')
         else:
