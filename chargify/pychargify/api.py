@@ -211,8 +211,10 @@ class ChargifyBase(object):
                                 node.appendChild(child)
                         element.appendChild(node)
                     else:
+                        log.debug("Adding element: %s (value: %s)" % (property, value))
                         try:
                             element.appendChild(value._toxml(dom))
+                            log.debug("New element contents: %s", element.toprettyxml())
                         except:
                             pass
                 else:
