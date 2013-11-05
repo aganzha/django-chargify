@@ -11,7 +11,7 @@ import traceback
 from django.conf import settings
 log = logging.getLogger("chargify")
 #logging.basicConfig(level=logging.DEBUG)
-log.debug("Loaded chargify/models.py from aganzha.")
+log.debug("Loaded chargify/models.py from aganzha. Test")
 
 def unique_reference(prefix = ''):
     return '%s%i' %(prefix, time.time()*1000)
@@ -583,7 +583,10 @@ class Subscription(models.Model, ChargifyBaseModel):
                 self.product = product
             api = self.api
             log.debug('Saving API')
-            log.debug("Coupon code in chargify/models.py: " + self.coupon_code)
+            ccode = 'None'
+            if self.coupon_code is not None:
+                ccode = self.coupon_code
+            log.debug("Coupon code in chargify/models.py: " + ccode)
             saved, subscription = api.save()
             if saved:
                 return self.load(subscription, commit=True) # object save happens after load
