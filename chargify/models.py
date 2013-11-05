@@ -11,7 +11,7 @@ import traceback
 from django.conf import settings
 log = logging.getLogger("chargify")
 #logging.basicConfig(level=logging.DEBUG)
-log.debug("Loaded chargify/models.py from aganzha. Test")
+log.debug("Loaded chargify/models.py from aganzha. Last")
 
 def unique_reference(prefix = ''):
     return '%s%i' %(prefix, time.time()*1000)
@@ -213,9 +213,13 @@ class Customer(models.Model, ChargifyBaseModel):
                 raise User.DoesNotExist
         except User.DoesNotExist: #@UndefinedVariable
             try:
-                user = User.objects.get(email=api.email)
+                # user = User.objects.get(email=api.email)
+                # aganzha
+                user = User.objects.get(username=api.email)
             except:
                 user = User(first_name = api.first_name, last_name = api.last_name, email = api.email, username = api.email)
+                # aganzha
+                log.error('New user just created for subscription!: %s' %(user))
                 user.save()
             customer.user = user
         customer.organization = api.organization
@@ -583,6 +587,7 @@ class Subscription(models.Model, ChargifyBaseModel):
                 self.product = product
             api = self.api
             log.debug('Saving API')
+            # aganzha
             ccode = 'None'
             if self.coupon_code is not None:
                 ccode = self.coupon_code
@@ -686,6 +691,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         subscription.product = self.product.api
         subscription.product_handle = self.product_handle
         subscription.coupon_code = self.coupon_code
+        # aganzha
         ccode = 'None'
         if subscription.coupon_code is not None:
             ccode = subscription.coupon_code
