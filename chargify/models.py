@@ -11,7 +11,7 @@ import traceback
 from django.conf import settings
 log = logging.getLogger("chargify")
 #logging.basicConfig(level=logging.DEBUG)
-log.debug("Loaded chargify/models.py, aganzha")
+log.debug("Loaded chargify/models.py, aganzha. Once more.")
 
 def unique_reference(prefix = ''):
     return '%s%i' %(prefix, time.time()*1000)
