@@ -678,7 +678,7 @@ class Subscription(models.Model, ChargifyBaseModel):
     def update(self, commit=True):
         """ Update Subscription data from chargify """
         subscription = self.gateway.Subscription().getBySubscriptionId(self.chargify_id)
-
+        log.debug('Updating subscription (in models)') 
         if subscription:
             return self.load(subscription, commit)
         else:

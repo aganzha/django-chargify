@@ -118,7 +118,9 @@ class ChargifyWebhookView(ChargifyWebhookBaseView):
         # update the subscription
         subscription_id = payload['subscription']['id']
         subscription, loaded = Subscription.objects.get_or_load(subscription_id)
-        subscription.update(True)
+        # aganzha
+        logger.info('Updating subscription! (in views)') 
+        subscription.update(commit=True)
 
         # call hook
         user = subscription.customer.user
@@ -133,7 +135,9 @@ class ChargifyWebhookView(ChargifyWebhookBaseView):
         # update the subscription
         subscription_id = payload['subscription']['id']
         subscription, loaded = Subscription.objects.get_or_load(subscription_id)
-        subscription.update(True)
+        # aganzha
+        logger.info('Updating subscription! (in views)') 
+        subscription.update(commit=True)
 
         # call hook
         previous_product_handle = payload['previous_product']['handle']
