@@ -645,6 +645,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         try:
             c = Customer.objects.get(chargify_id = api.customer.id)
         except:
+            log.debug("cant get customer. will create new one! ")
             c = Customer()
             c.load(api.customer)
         self.customer = c
@@ -652,16 +653,23 @@ class Subscription(models.Model, ChargifyBaseModel):
         try:
             p = Product.objects.get(chargify_id = api.product.id)
         except:
+            log.debug("cant get product. will create new one! ")
             p = Product()
             p.load(api.product)
             p.save()
         self.product = p
 
-        if self.credit_card:
-            credit_card = self.credit_card
-        else:
-            credit_card = CreditCard()
-            credit_card.load(api.credit_card)
+        # aganzha
+        credit_card = CreditCard()
+        credit_card.load(api.credit_card)
+        self.credit_card = credit_card
+        
+        # if self.credit_card:
+        #     credit_card = self.credit_card
+        # else:
+        #     log.debug("cant get customer. will create new one!")
+        #     credit_card = CreditCard()
+        #     credit_card.load(api.credit_card)
         if commit:
             self.save()
         return self
