@@ -670,6 +670,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         #     log.debug("cant get customer. will create new one!")
         #     credit_card = CreditCard()
         #     credit_card.load(api.credit_card)
+        log.debug('force store credit card!')
         if commit:
             self.save()
         return self
