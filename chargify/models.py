@@ -599,19 +599,19 @@ class Subscription(models.Model, ChargifyBaseModel):
 
 
     def reactivate(self):
-        self.last_activation_at = datetime.datetime.now()
+        self.last_activation_at = datetime.now()
         self.api.reactivate()
         self.update()
 
     def unsubscribe(self, message="", *args, **kwargs):
         self.api.unsubscribe(message=message)
-        self.last_deactivation_at = datetime.datetime.now()
+        self.last_deactivation_at = datetime.now()
         self.update(commit=True)
 
     def delete(self, save_api = False, commit = True, message = None, *args, **kwargs):
         if save_api:
             self.api.delete(message=message)
-        self.last_deactivation_at = datetime.datetime.now()
+        self.last_deactivation_at = datetime.now()
         if commit:
             super(Subscription, self).delete(*args, **kwargs)
         else:
@@ -659,11 +659,12 @@ class Subscription(models.Model, ChargifyBaseModel):
             p.save()
         self.product = p
 
+
         # aganzha
         credit_card = CreditCard()
-        credit_card.load(api.credit_card)
+        credit_card.load(api.credit_card, commit=commit)
         self.credit_card = credit_card
-        
+
         # if self.credit_card:
         #     credit_card = self.credit_card
         # else:
@@ -678,7 +679,7 @@ class Subscription(models.Model, ChargifyBaseModel):
     def update(self, commit=True):
         """ Update Subscription data from chargify """
         subscription = self.gateway.Subscription().getBySubscriptionId(self.chargify_id)
-        log.debug('Updating subscription (in models)') 
+        log.debug('Updating subscription (in models)')
         if subscription:
             return self.load(subscription, commit)
         else:
@@ -709,6 +710,9 @@ class Subscription(models.Model, ChargifyBaseModel):
             subscription.customer = self.customer._api('customer_attributes')
         else:
             subscription.customer = self.customer._api('customer_id')
+        # aganzha!
+        # we sdave subsription with credit card only if user updates his credit card!
+        # if it is, for example, plan upgrade, do not sent credit card!
         if self.credit_card:
             subscription.credit_card = self.credit_card._api('credit_card_attributes')
         return subscription
