@@ -92,6 +92,20 @@ class CustomerManager(ChargifyBaseManager):
         return self.gateway.Customer()
     api = property(_api)
 
+
+
+def toAscii(value):
+    retval = value.encode('ascii', errors='ignore')
+    if len(retval)==0:
+        for ch in value:
+            if ch == ' ':
+                retval+=' '
+            else:
+                retval +='X'
+    return retval
+
+
+
 class Customer(models.Model, ChargifyBaseModel):
     """ The following are mapped fields:
         first_name = User.first_name (required)
@@ -244,10 +258,10 @@ class Customer(models.Model, ChargifyBaseModel):
         """ Load data into chargify api object """
         customer = self.gateway.Customer()
         customer.id = str(self.chargify_id)
-        customer.first_name = str(self.first_name)
-        customer.last_name = str(self.last_name)
-        customer.email = str(self.email)
-        customer.organization = str(self.organization)
+        customer.first_name = toAscii(self.first_name)
+        customer.last_name = toAscii(self.last_name)
+        customer.email = toAscii(self.email)
+        customer.organization = toAscii(self.organization)
         customer.reference = str(self.reference)
         return customer
     api = property(_api)
@@ -446,17 +460,17 @@ class CreditCard(models.Model, ChargifyBaseModel):
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
         cc = self.gateway.CreditCard()
-        cc.first_name = self.first_name
-        cc.last_name = self.last_name
+        cc.first_name = toAscii(self.first_name)
+        cc.last_name = toAscii(self.last_name)
         cc.full_number = self._full_number
         cc.expiration_month = self.expiration_month
         cc.expiration_year = self.expiration_year
         cc.ccv = self.ccv
-        cc.billing_address = self.billing_address
-        cc.billing_city = self.billing_city
-        cc.billing_state = self.billing_state
-        cc.billing_zip = self.billing_zip
-        cc.billing_country = self.billing_country
+        cc.billing_address = toAscii(self.billing_address)
+        cc.billing_city = toAscii(self.billing_city)
+        cc.billing_state = toAscii(self.billing_state)
+        cc.billing_zip = toAscii(self.billing_zip)
+        cc.billing_country = toAscii(self.billing_country)
         return cc
     api = property(_api)
 
@@ -714,7 +728,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             subscription.customer = self.customer._api('customer_id')
         # aganzha!
         # we sdave subsription with credit card only if user updates his credit card!
-        # if it is, for example, plan upgrade, do not sent credit card!
+        # if it is, for example, plan upgrade, do not sent credit card!        
         if self.credit_card:
             subscription.credit_card = self.credit_card._api('credit_card_attributes')
         return subscription
