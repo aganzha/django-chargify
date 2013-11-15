@@ -95,6 +95,8 @@ class CustomerManager(ChargifyBaseManager):
 
 
 def toAscii(value):
+    if value is None:
+        return ''
     retval = value.encode('ascii', errors='ignore')
     if len(retval)==0:
         for ch in value:
