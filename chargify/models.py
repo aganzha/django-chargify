@@ -665,7 +665,8 @@ class Subscription(models.Model, ChargifyBaseModel):
         except:
             log.debug("cant get customer. will create new one! ")
             c = Customer()
-            c.load(api.customer)
+            c = c.load(api.customer)
+            
         self.customer = c
 
         try:
@@ -689,7 +690,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         #     log.debug("cant get customer. will create new one!")
         #     credit_card = CreditCard()
         #     credit_card.load(api.credit_card)
-        log.debug('force store credit card!')
+        log.debug('subscription loaded from api!')
         if commit:
             self.save()
         return self
@@ -706,6 +707,9 @@ class Subscription(models.Model, ChargifyBaseModel):
     def charge(self, amount, memo):
         """ Create a one-time charge """
         return self.api.charge(amount, memo)
+
+    def next_billing_date(self):
+        self.update(self.api.next_billing_date(self.current_period_ends_at))
 
     def upgrade(self, product):
         """ Upgrade / Downgrade products """

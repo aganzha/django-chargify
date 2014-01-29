@@ -199,6 +199,7 @@ class ChargifyBase(object):
         Return a XML Representation of the object
         """
         log.debug("Converting element to xml....")
+
         element = minidom.Element(self.__xmlnodename__)
         for property, value in self.__dict__.iteritems():
             if not property in self.__ignore__ and not inspect.isfunction(value):
@@ -223,6 +224,7 @@ class ChargifyBase(object):
                     node_txt = dom.createTextNode(str(value).encode('ascii', 'xmlcharrefreplace'))
                     node.appendChild(node_txt)
                     element.appendChild(node)
+
         return element
 
     def _get(self, url):
@@ -294,7 +296,7 @@ class ChargifyBase(object):
         elif response.status == 422:
             print data
             print r
-            raise ChargifyUnProcessableEntity()
+            raise ChargifyUnProcessableEntity(r)
 
         # Generic Server Errors
         elif response.status in [405, 500]:
@@ -310,7 +312,7 @@ class ChargifyBase(object):
         """
         dom = minidom.Document()
         dom.appendChild(self._toxml(dom))
-
+        
         request_made = {
             'day': datetime.datetime.today().day,
             'month': datetime.datetime.today().month,
@@ -356,6 +358,18 @@ class ChargifyBase(object):
                 if not do_paging or not vals: break
             return rv
         raise NotImplementedError('Subclass is missing Meta class attribute listing')
+
+    # aganzha
+    def getPage(self, page):
+        if self.Meta.listing:
+            rv = []
+            url = '/%s.xml' % self.Meta.listing
+            url += '?page=%s' % page            
+            vals = self._applyA(self._get(url), self.__name__, self.__xmlnodename__)
+            rv.extend(vals)
+            return rv
+        raise NotImplementedError('Subclass is missing Meta class attribute listing')
+
 
     def getById(self, id):
         if self.Meta.listing:
@@ -601,6 +615,17 @@ class ChargifySubscription(ChargifyBase):
 
     def reactivate(self):
         self._put("/subscriptions/" + self.id + "/reactivate.xml", "")
+
+    def next_billing_date(self,date):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+  <subscription>
+   <next_billing_at>%s</next_billing_at>
+  </subscription>""" % str(date).replace(' ','T')
+        # [@new_date = @subscription.current_period_ends_at + 1.week]
+        return self._applyS(self._put("/subscriptions/" + self.id + ".xml",
+            xml), self.__name__, "subscription")
+
+
 
     def upgrade(self, toProductHandle):
         xml = """<?xml version="1.0" encoding="UTF-8"?>
