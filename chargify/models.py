@@ -640,8 +640,14 @@ class Subscription(models.Model, ChargifyBaseModel):
         self.state = api.state
         self.balance_in_cents = api.balance_in_cents
         self.coupon_code = api.coupon_code
-        self.current_period_started_at = new_datetime(api.current_period_started_at)
-        self.current_period_ends_at = new_datetime(api.current_period_ends_at)
+
+        try:
+            self.current_period_started_at = new_datetime(api.current_period_started_at)
+            self.current_period_ends_at = new_datetime(api.current_period_ends_at)
+        except:
+            # it could be none, if subscription is cancelled
+            pass
+
         if api.trial_started_at:
             self.trial_started_at = new_datetime(api.trial_started_at)
         else:
