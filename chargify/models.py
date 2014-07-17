@@ -564,6 +564,8 @@ class Subscription(models.Model, ChargifyBaseModel):
     active = models.BooleanField(default=True)
     objects = SubscriptionManager()
 
+    total_revenue = models.DecimalField(decimal_places = 2, max_digits = 15, default=Decimal('0.00'))
+
     def __unicode__(self):
         s = unicode(self.get_state_display())
         if self.product:
@@ -578,6 +580,14 @@ class Subscription(models.Model, ChargifyBaseModel):
     def _set_balance_in_cents(self, value):
         self.balance = self._from_cents(value)
     balance_in_cents = property(_balance_in_cents, _set_balance_in_cents)
+
+
+    def _total_revenue_in_cents(self):
+        return self._in_cents(self.total_revenue)
+    def _set_total_revenue_in_cents(self, value):
+        self.total_revenue = self._from_cents(value)
+    total_revenue_in_cents = property(_total_revenue_in_cents, _set_total_revenue_in_cents)
+
 
     def _customer_reference(self):
         return self.customer.reference
@@ -639,6 +649,7 @@ class Subscription(models.Model, ChargifyBaseModel):
         self.chargify_id = int(api.id)
         self.state = api.state
         self.balance_in_cents = api.balance_in_cents
+        self.total_revenue = api.total_revenue_in_cents
         self.coupon_code = api.coupon_code
 
         try:
