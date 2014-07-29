@@ -168,7 +168,7 @@ class Customer(models.Model, ChargifyBaseModel):
 
     def _get_reference(self):
         """ You must save the customer before you can get the reference number"""
-        if getattr(settings, 'TESTING', False) and not self._reference:
+        if getattr(settings, 'DEVELOPMENT', False) and not self._reference:
             self._reference = unique_reference()
 
         if self._reference:
