@@ -602,24 +602,13 @@ class Subscription(models.Model, ChargifyBaseModel):
             save_api = True
         if save_api:
             if self.customer.chargify_id is None:
-                log.debug('Saving Customer')
                 self.customer.save(save_api = True)
                 customer = self.customer
-                log.debug("Returned Customer: %s" %(customer))
-                log.debug('Customer ID: %s' %(customer.chargify_id))
                 self.customer = customer
             if self.product and self.product.chargify_id is None:
-                log.debug('Saving Product')
                 product = self.product.save(save_api = True)
-                log.debug("Returned Product : %s" %(product))
                 self.product = product
             api = self.api
-            log.debug('Saving API')
-            # aganzha
-            ccode = 'None'
-            if self.coupon_code is not None:
-                ccode = self.coupon_code
-            log.debug("Coupon code in chargify/models.py: " + ccode)
             saved, subscription = api.save()
             if saved:
                 return self.load(subscription, commit=True) # object save happens after load
