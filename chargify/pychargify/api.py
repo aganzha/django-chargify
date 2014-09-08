@@ -640,13 +640,22 @@ class ChargifySubscription(ChargifyBase):
 
     def unsubscribe(self, message):
         xml = """<?xml version="1.0" encoding="UTF-8"?>
-<subscription>
-  <cancellation_message>
-    %s
-  </cancellation_message>
-</subscription>""" % (message)
-
+        <subscription>    
+        <cancellation_message>
+        %s
+        </cancellation_message>
+        </subscription>""" % (message)
+        
         self._delete("/subscriptions/" + self.id + ".xml", xml)
+
+    def cancel_at_end_of_period(self):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <subscription>    
+        <cancel_at_end_of_period>1</cancel_at_end_of_period>
+        </subscription>"""
+        
+        self._put("/subscriptions/" + self.id + ".xml", xml)
+
 
     def charge(self, amount, memo):
         xml = """<?xml version="1.0" encoding="UTF-8"?>

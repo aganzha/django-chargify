@@ -620,6 +620,10 @@ class Subscription(models.Model, ChargifyBaseModel):
         self.api.reactivate()
         self.update()
 
+    def cancel_at_end_of_period(self):
+        self.api.cancel_at_end_of_period()
+        self.update(commit=True)
+
     def unsubscribe(self, message="", *args, **kwargs):
         self.api.unsubscribe(message=message)
         self.last_deactivation_at = datetime.now()
