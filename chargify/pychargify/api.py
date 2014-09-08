@@ -198,7 +198,7 @@ class ChargifyBase(object):
         """
         Return a XML Representation of the object
         """
-        log.debug("Converting element to xml....")
+        # log.debug("Converting element to xml....")
 
         element = minidom.Element(self.__xmlnodename__)
         for property, value in self.__dict__.iteritems():
@@ -213,10 +213,10 @@ class ChargifyBase(object):
                                 node.appendChild(child)
                         element.appendChild(node)
                     else:
-                        log.debug("Adding element: %s (value: %s)" % (property, value))
+                        #log.debug("Adding element: %s (value: %s)" % (property, value))
                         try:
                             element.appendChild(value._toxml(dom))
-                            log.debug("New element contents: %s", element.toprettyxml())
+                            # log.debug("New element contents: %s", element.toprettyxml())
                         except:
                             pass
                 else:
@@ -269,8 +269,8 @@ class ChargifyBase(object):
         http.putheader("Content-Type", 'text/xml; charset="UTF-8"')
         http.endheaders()
 
-        log.debug('url: %s' % url)
-        log.debug('sending: %s' % data)
+        # log.debug('url: %s' % url)
+        # log.debug('sending: %s' % data)
 
         if data:
             http.send(data)
@@ -278,7 +278,7 @@ class ChargifyBase(object):
         response = http.getresponse()
         r = response.read()
 
-        log.debug('got: %s' % r)
+        # log.debug('got: %s' % r)
 
         # Unauthorized Error
         if response.status == 401:
@@ -294,8 +294,8 @@ class ChargifyBase(object):
 
         # Unprocessable Entity Error
         elif response.status == 422:
-            print data
-            print r
+            # print data
+            # print r
             raise ChargifyUnProcessableEntity(r)
 
         # Generic Server Errors

@@ -696,7 +696,6 @@ class Subscription(models.Model, ChargifyBaseModel):
         #     log.debug("cant get customer. will create new one!")
         #     credit_card = CreditCard()
         #     credit_card.load(api.credit_card)
-        log.debug('subscription loaded from api!')
         if commit:
             self.save()
         return self
@@ -733,7 +732,6 @@ class Subscription(models.Model, ChargifyBaseModel):
         ccode = 'None'
         if subscription.coupon_code is not None:
             ccode = subscription.coupon_code
-        log.debug("Coupon code in _api: " + ccode)
         if self.customer.chargify_id is None:
             subscription.customer = self.customer._api('customer_attributes')
         else:
