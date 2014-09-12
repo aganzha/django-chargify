@@ -720,6 +720,12 @@ class Subscription(models.Model, ChargifyBaseModel):
     def next_billing_date(self):
         self.update(self.api.next_billing_date(self.current_period_ends_at))
 
+    def preview_migration(self, product):
+        return self.api.preview_migration(product.handle)
+
+    def migrate(self, product):        
+        return self.update(self.api.migrate(product.handle))
+
     def upgrade(self, product):
         """ Upgrade / Downgrade products """
         return self.update(self.api.upgrade(product.handle))

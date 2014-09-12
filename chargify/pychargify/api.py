@@ -189,6 +189,7 @@ class ChargifyBase(object):
         """
         dom = minidom.parseString(xml)
         nodes = dom.getElementsByTagName(node_name)
+
         objs = []
         for node in nodes:
             objs.append(self.__get_object_from_node(node, obj_type))
@@ -256,13 +257,12 @@ class ChargifyBase(object):
         Handled the request and sends it to the server
         """
         http = httplib.HTTPSConnection(self.request_host)
-
         http.putrequest(method, url)
         http.putheader("Authorization", "Basic %s" % self._get_auth_string())
         http.putheader("User-Agent", "pychargify")
         http.putheader("Host", self.request_host)
         http.putheader("Accept", "application/xml")
-
+        
         if data:
             http.putheader("Content-Length", str(len(data)))
 
@@ -547,6 +547,13 @@ class ChargifyProduct(ChargifyBase):
         return "$%.2f" % (self.getPriceInDollars())
 
 
+
+class PreviewMigration(ChargifyBase):
+    payment_due_in_cents=''
+    credit_applied_in_cents=''
+    prorated_adjustment_in_cents=''
+    charge_in_cents=''
+
 class ChargifySubscription(ChargifyBase):
     """
     Represents Chargify Subscriptions
@@ -625,6 +632,24 @@ class ChargifySubscription(ChargifyBase):
         # [@new_date = @subscription.current_period_ends_at + 1.week]
         return self._applyS(self._put("/subscriptions/" + self.id + ".xml",
             xml), self.__name__, "subscription")
+
+
+    def migrate(self, toProduct):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+  <migration>
+    <product_handle>%s</product_handle>
+  </migration>""" % (toProduct)
+        return self._applyS(self._post("/subscriptions/" + self.id + "/migrations.xml",
+            xml), self.__name__, "subscription")
+
+
+    def preview_migration(self, toProduct):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+  <migration>
+    <product_handle>%s</product_handle>
+  </migration>""" % (toProduct)
+        return self._applyS(self._post("/subscriptions/" + self.id + "/migrations/preview.xml",
+            xml), 'PreviewMigration','migration')
 
 
 
