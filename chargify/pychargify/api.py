@@ -269,8 +269,8 @@ class ChargifyBase(object):
         http.putheader("Content-Type", 'text/xml; charset="UTF-8"')
         http.endheaders()
 
-        # log.debug('url: %s' % url)
-        # log.debug('sending: %s' % data)
+        log.debug('url: %s' % url)
+        log.debug('sending: %s' % data)
 
         if data:
             http.send(data)
@@ -278,7 +278,7 @@ class ChargifyBase(object):
         response = http.getresponse()
         r = response.read()
 
-        # log.debug('got: %s' % r)
+        log.debug('got: %s' % r)
 
         # Unauthorized Error
         if response.status == 401:
