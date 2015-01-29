@@ -392,7 +392,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
     billing_country = models.CharField(max_length=75, null=True, blank=True, default='United States')
     active = models.BooleanField(default=True)
     objects = CreditCardManager()
-    chargify_id = models.IntegerField(null=True, blank=True, unique=True)
+    chargify_id = models.IntegerField(null=True, blank=True)
 
     def __unicode__(self):
         s = u''
