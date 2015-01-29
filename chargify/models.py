@@ -443,6 +443,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
         return super(CreditCard, self).delete(*args, **kwargs)
 
     def load(self, api, commit=True):
+        print "load credit caaaaaaaaaaard2!"
         if api is None:
             return self
         self.masked_card_number = api.masked_card_number
@@ -456,7 +457,9 @@ class CreditCard(models.Model, ChargifyBaseModel):
 
     def update(self, commit=True):
         """ Update Credit Card data from chargify """
+        print "updating credit card!"
         if self.subscription:
+            print "yes!"
             return self.subscription.update()
         else:
             return self
