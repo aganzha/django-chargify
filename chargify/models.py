@@ -392,6 +392,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
     billing_country = models.CharField(max_length=75, null=True, blank=True, default='United States')
     active = models.BooleanField(default=True)
     objects = CreditCardManager()
+    chargify_id = models.IntegerField(null=True, blank=True, unique=True)
 
     def __unicode__(self):
         s = u''
@@ -448,6 +449,7 @@ class CreditCard(models.Model, ChargifyBaseModel):
         self.expiration_month = api.expiration_month
         self.expiration_year = api.expiration_year
         self.credit_type = api.type
+        self.chargify_id = api.id
         if commit:
             self.save(save_api = False)
         return self
@@ -458,6 +460,13 @@ class CreditCard(models.Model, ChargifyBaseModel):
             return self.subscription.update()
         else:
             return self
+
+    def _existent_api(self, node_name=''):
+        cc = self.gateway.ExistingCard()
+        cc.id = self.chargify_id
+        print "eeeeeeeeeeeeeeeeeeeeeeeee"
+        print cc, cc.id
+        return cc
 
     def _api(self, node_name = ''):
         """ Load data into chargify api object """
@@ -560,7 +569,7 @@ class Subscription(models.Model, ChargifyBaseModel):
     updated_at = models.DateTimeField(null=True, blank=True)
     customer = models.ForeignKey(Customer, null=True)
     product = models.ForeignKey(Product, null=True)
-    credit_card = models.OneToOneField(CreditCard, related_name='subscription', null=True, blank=True)
+    credit_card = models.ForeignKey(CreditCard, related_name='subscription', null=True, blank=True)
     active = models.BooleanField(default=True)
     objects = SubscriptionManager()
 
@@ -689,17 +698,20 @@ class Subscription(models.Model, ChargifyBaseModel):
         self.product = p
 
 
-        # aganzha
-        credit_card = CreditCard()
-        credit_card.load(api.credit_card, commit=commit)
-        self.credit_card = credit_card
-
-        # if self.credit_card:
-        #     credit_card = self.credit_card
-        # else:
-        #     log.debug("cant get customer. will create new one!")
-        #     credit_card = CreditCard()
-        #     credit_card.load(api.credit_card)
+        # aganzha ????
+        # credit_card = CreditCard()
+        # credit_card.load(api.credit_card, commit=commit)
+        # self.credit_card = credit_card        
+        if self.credit_card:
+            print "ttttttttttttttttttttttt"
+            print self.credit_card.chargify_id, self.credit_card.id
+            # credit_card = self.credit_card
+        else:
+            print "mockkkkkkkkkkkkkkk"
+            log.debug("cant get customer. will create new one!")
+            credit_card = CreditCard()
+            credit_card.load(api.credit_card)
+            self.credit_card = credit_card
         if commit:
             self.save()
         return self
@@ -749,7 +761,11 @@ class Subscription(models.Model, ChargifyBaseModel):
         # aganzha!
         # we sdave subsription with credit card only if user updates his credit card!
         # if it is, for example, plan upgrade, do not sent credit card!        
+        print "loooooooooooooooooooooooooooo!", self.credit_card, subscription.credit_card
         if self.credit_card:
-            subscription.credit_card = self.credit_card._api('credit_card_attributes')
+            if self.credit_card.chargify_id:
+                subscription.credit_card = self.credit_card._existent_api('payment_profile_id')
+            else:
+                subscription.credit_card = self.credit_card._api('credit_card_attributes')
         return subscription
     api = property(_api)

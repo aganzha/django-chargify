@@ -200,9 +200,10 @@ class ChargifyBase(object):
         Return a XML Representation of the object
         """
         # log.debug("Converting element to xml....")
-
+        
         element = minidom.Element(self.__xmlnodename__)
         for property, value in self.__dict__.iteritems():
+            # print "da!", property, value
             if not property in self.__ignore__ and not inspect.isfunction(value):
                 if property in self.__attribute_types__:
                     if type(value) == list:
@@ -225,7 +226,10 @@ class ChargifyBase(object):
                     node_txt = dom.createTextNode(str(value).encode('ascii', 'xmlcharrefreplace'))
                     node.appendChild(node_txt)
                     element.appendChild(node)
-
+            else:
+                pass
+                # print "fuck", property, value
+                # print self,self.__ignore__, inspect.isfunction(value)
         return element
 
     def _get(self, url):
@@ -690,6 +694,25 @@ class ChargifySubscription(ChargifyBase):
 </charge>""" % (amount, memo)
         self._post('/subscriptions/' + self.id + '/charges.xml', xml)
 
+
+class ChargifyExistingCard(ChargifyBase):
+    __name__ = 'ChargifyExistingCard'
+    __attribute_types__ = {}
+    __xmlnodename__ = 'payment_profile_id'
+    def _toxml(self, dom):
+        """
+        Return a XML Representation of the object
+        """
+        element = minidom.Element("payment_profile_id")
+        node_txt = dom.createTextNode(str(self.id))
+        element.appendChild(node_txt)
+        return element
+
+
+    # id = ''
+    # __ignore__ = ['api_key', 'sub_domain', 'base_host', 'request_host','__xmlnodename__', 'Meta']
+
+
 class ChargifyCreditCard(ChargifyBase):
     """
     Represents Chargify Credit Cards
@@ -711,7 +734,7 @@ class ChargifyCreditCard(ChargifyBase):
     billing_state = ''
     billing_zip = ''
     billing_country = ''
-
+    
     def save(self, subscription):
         path = "/subscriptions/%s.xml" % (subscription.id)
         data = u'<?xml version="1.0" encoding="UTF-8"?><subscription><credit_card_attributes>%s</credit_card_attributes></subscription>' % (
@@ -927,6 +950,10 @@ class Chargify:
 
     def CreditCard(self):
         return ChargifyCreditCard(self.api_key, self.sub_domain)
+
+    def ExistingCard(self):
+        return ChargifyExistingCard(self.api_key, self.sub_domain)
+
 
     def PostBack(self, postbackdata):
         return ChargifyPostBack(self.api_key, self.sub_domain, postbackdata)
