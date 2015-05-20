@@ -11,7 +11,7 @@ import traceback
 from django.conf import settings
 log = logging.getLogger("chargify")
 #logging.basicConfig(level=logging.DEBUG)
-log.debug("Loaded chargify/models.py from aganzha. Force!")
+log.debug("Loaded chargify/models.py from aganzha. Force!-")
 
 def unique_reference(prefix = ''):
     return '%s%i' %(prefix, time.time()*1000)
@@ -341,7 +341,9 @@ class Product(models.Model, ChargifyBaseModel):
         self.price_in_cents = api.price_in_cents
         self.name = api.name
         self.handle = api.handle
-        self.product_family = api.product_family
+        # aganzha
+        # self.product_family = api.product_family
+        self.product_family = str(api.product_family.id)
         self.accounting_code = api.accounting_code
         self.interval_unit = api.interval_unit
         self.interval = api.interval

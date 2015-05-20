@@ -551,6 +551,13 @@ class ChargifyProduct(ChargifyBase):
         return "$%.2f" % (self.getPriceInDollars())
 
 
+    def save(self):
+        """agazna: creation of product. here product_family used as product_family_id. 
+           thats bad, but our models are broken """
+        return self._save('product_families/{}/products'.format(self.product_family), self.__xmlnodename__)
+
+
+
 
 class PreviewMigration(ChargifyBase):
     payment_due_in_cents=''
