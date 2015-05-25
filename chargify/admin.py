@@ -44,12 +44,15 @@ admin.site.register(Product, ProductAdmin)
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ['customer', 'product', 'chargify_id', 'balance', 'current_period_started_at', 'trial_started_at', 'active']
-    ordering = ['customer']
+    list_display = ['user', 'product', 'chargify_id', 'balance', 'current_period_started_at', 'trial_started_at', 'active']
+    # ordering = ['customer__user__id']
     actions = [update, 'reload_all_subscriptions']
     search_fields =('customer__user__id', 'chargify_id')
     def reload_all_subscriptions(self, request, queryset = None):
         Subscription.objects.reload_all()
+
+    def user(self, some):
+        return u'auth user id: {}, {}'.format(some.customer.user.id, some.customer.user.username)
 
 admin.site.register(Subscription, SubscriptionAdmin)
 
