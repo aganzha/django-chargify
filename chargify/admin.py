@@ -47,7 +47,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['customer', 'product', 'chargify_id', 'balance', 'current_period_started_at', 'trial_started_at', 'active']
     ordering = ['customer']
     actions = [update, 'reload_all_subscriptions']
-
+    search_fields =('customer__user__id', 'chargify_id')
     def reload_all_subscriptions(self, request, queryset = None):
         Subscription.objects.reload_all()
 
