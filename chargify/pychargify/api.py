@@ -535,6 +535,10 @@ class ChargifyProduct(ChargifyBase):
     accounting_code = ''
     interval_unit = ''
     interval = 0
+    trial_price_in_cents = 0
+    trial_interval = 2
+    trial_interval_unit = 'month'
+
 
     def getByHandle(self, handle):
         return self._applyS(self._get('/products/handle/' + str(handle) +
@@ -552,7 +556,7 @@ class ChargifyProduct(ChargifyBase):
 
 
     def save(self):
-        """agazna: creation of product. here product_family used as product_family_id. 
+        """aganzha: creation of product. here product_family used as product_family_id. 
            thats bad, but our models are broken """
         return self._save('product_families/{}/products'.format(self.product_family), self.__xmlnodename__)
 

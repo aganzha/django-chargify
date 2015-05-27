@@ -304,6 +304,11 @@ class Product(models.Model, ChargifyBaseModel):
     active = models.BooleanField(default=True)
     objects = ProductManager()
 
+    trial_price_in_cents = models.IntegerField(default=0)
+    trial_interval = models.IntegerField(default=2)
+    trial_interval_unit = models.CharField(max_length=32, default='month')
+    
+
     def __unicode__(self):
         s = ""
         if self.product_family is not None:
@@ -367,6 +372,10 @@ class Product(models.Model, ChargifyBaseModel):
         product.accounting_code = self.accounting_code
         product.interval_unit = self.interval_unit
         product.interval = self.interval
+        product.trial_price_in_cents = self.trial_price_in_cents
+        product.trial_interval = self.trial_interval
+        product.trial_interval_unit = self.trial_interval_unit
+
         return product
     api = property(_api)
 
