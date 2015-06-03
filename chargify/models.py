@@ -372,11 +372,22 @@ class Product(models.Model, ChargifyBaseModel):
         product.accounting_code = self.accounting_code
         product.interval_unit = self.interval_unit
         product.interval = self.interval
-        product.trial_price_in_cents = self.trial_price_in_cents
-        product.trial_interval = self.trial_interval
-        product.trial_interval_unit = self.trial_interval_unit
 
+        ignores = ['trial_price_in_cents','trial_interval','trial_interval_unit']
+        print "....."
+        if self.trial_interval:
+            print "1"
+            product.trial_price_in_cents = self.trial_price_in_cents
+            product.trial_interval = self.trial_interval
+            product.trial_interval_unit = self.trial_interval_unit
+            product.__ignore__ = [i for i in product.__ignore__ if i not in ignores]
+        else:
+            print "2"
+            product.__ignore__+=ignores
+            print product.__ignore__
+        print "paaaaaaaaaaaaaasas"
         return product
+
     api = property(_api)
 
 class CreditCardManager(ChargifyBaseManager):

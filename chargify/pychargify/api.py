@@ -204,6 +204,8 @@ class ChargifyBase(object):
         element = minidom.Element(self.__xmlnodename__)
         for property, value in self.__dict__.iteritems():
             # print "da!", property, value
+            if property == '__ignore__':
+                continue
             if not property in self.__ignore__ and not inspect.isfunction(value):
                 if property in self.__attribute_types__:
                     if type(value) == list:
@@ -536,7 +538,7 @@ class ChargifyProduct(ChargifyBase):
     interval_unit = ''
     interval = 0
     trial_price_in_cents = 0
-    trial_interval = 2
+    trial_interval = 0
     trial_interval_unit = 'month'
 
 
