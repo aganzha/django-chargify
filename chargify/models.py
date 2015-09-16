@@ -348,7 +348,10 @@ class Product(models.Model, ChargifyBaseModel):
         self.handle = api.handle
         # aganzha
         # self.product_family = api.product_family
-        self.product_family = str(api.product_family.id)
+        if type(api.product_family) is str:
+            self.product_family = api.product_family
+        else:
+            self.product_family = str(api.product_family.id)
         self.accounting_code = api.accounting_code
         self.interval_unit = api.interval_unit
         self.interval = api.interval
