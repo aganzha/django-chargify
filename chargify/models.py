@@ -604,6 +604,11 @@ class Subscription(models.Model, ChargifyBaseModel):
 
     total_revenue = models.DecimalField(decimal_places = 2, max_digits = 15, default=Decimal('0.00'))
 
+    
+    def get_amount(self):
+        return self.product.price
+
+    
     def __unicode__(self):
         s = unicode(self.get_state_display())
         if self.product:
