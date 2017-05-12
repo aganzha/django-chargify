@@ -591,7 +591,8 @@ class Subscription(models.Model, ChargifyBaseModel):
     current_period_started_at = models.DateTimeField(null=True, blank=True)
     current_period_ends_at = models.DateTimeField(null=True, blank=True)
     trial_started_at = models.DateTimeField(null=True, blank=True)
-    trial_ended_at = models.DateTimeField(null=True, blank=True)
+    trial_ended_at = models.DateTimeField(null=True, blank=True)    
+    canceled_at = models.DateTimeField(null=True, blank=True)
     activated_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
@@ -703,6 +704,10 @@ class Subscription(models.Model, ChargifyBaseModel):
             self.trial_ended_at = new_datetime(api.trial_ended_at)
         else:
             self.trial_ended_at = None
+        if api.canceled_at:
+            self.canceled_at = new_datetime(api.canceled_at)
+        else:
+            self.canceled_at = None
         if api.activated_at:
             self.activated_at = new_datetime(api.activated_at)
         else:
