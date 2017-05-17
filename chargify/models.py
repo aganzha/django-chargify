@@ -748,12 +748,9 @@ class Subscription(models.Model, ChargifyBaseModel):
         # credit_card.load(api.credit_card, commit=commit)
         # self.credit_card = credit_card
         if self.credit_card:
-            print "ttttttttttttttttttttttt"
-            print self.credit_card.chargify_id, self.credit_card.id
             self.credit_card.load(api.credit_card)
             # credit_card = self.credit_card
         else:
-            print "mockkkkkkkkkkkkkkk"
             log.debug("cant get customer. will create new one!")
             credit_card = CreditCard()
             credit_card.load(api.credit_card)
@@ -766,10 +763,14 @@ class Subscription(models.Model, ChargifyBaseModel):
         """ Update Subscription data from chargify """
         subscription = self.gateway.Subscription().getBySubscriptionId(self.chargify_id)
         log.debug('Updating subscription (in models)')
+        ld = None
         if subscription:
-            return self.load(subscription, commit)
-        else:
-            return None
+            ld = self.load(subscription, commit)
+        try:
+            Transaction.load_for_sub(ld)
+        except:
+            log.error(u'can not load chargify transactions for {}'.format(ld),exc_info=True)
+        return ld
 
     def charge(self, amount, memo):
         """ Create a one-time charge """
@@ -807,7 +808,6 @@ class Subscription(models.Model, ChargifyBaseModel):
         # aganzha!
         # we sdave subsription with credit card only if user updates his credit card!
         # if it is, for example, plan upgrade, do not sent credit card!
-        print "loooooooooooooooooooooooooooo!", self.credit_card, subscription.credit_card
         if self.credit_card:
             if self.credit_card.chargify_id:
                 subscription.credit_card = self.credit_card._existent_api('payment_profile_id')
