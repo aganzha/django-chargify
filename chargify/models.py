@@ -818,7 +818,7 @@ class Subscription(models.Model, ChargifyBaseModel):
 
 class Transaction(models.Model):
     chargify_id = models.IntegerField(null=True, blank=True, unique=True)
-    type = models.CharField(max_length=16,db_index=True)
+    type = models.CharField(max_length=32,db_index=True)
     kind = models.CharField(max_length=32, null=True, blank=True)
     success = models.BooleanField()
     amount_in_cents = models.IntegerField(default=0)
