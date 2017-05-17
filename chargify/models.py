@@ -9,6 +9,12 @@ import logging
 import time
 import traceback
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+import dateutil.parser
+import json
+import requests
+from requests.auth import HTTPBasicAuth
+
 log = logging.getLogger("chargify")
 #logging.basicConfig(level=logging.DEBUG)
 log.debug("Loaded chargify/models.py from aganzha. Force!-")
@@ -307,7 +313,7 @@ class Product(models.Model, ChargifyBaseModel):
     trial_price_in_cents = models.IntegerField(default=0)
     trial_interval = models.IntegerField(default=2)
     trial_interval_unit = models.CharField(max_length=32, default='month')
-    
+
 
     def __unicode__(self):
         s = ""
@@ -591,7 +597,7 @@ class Subscription(models.Model, ChargifyBaseModel):
     current_period_started_at = models.DateTimeField(null=True, blank=True)
     current_period_ends_at = models.DateTimeField(null=True, blank=True)
     trial_started_at = models.DateTimeField(null=True, blank=True)
-    trial_ended_at = models.DateTimeField(null=True, blank=True)    
+    trial_ended_at = models.DateTimeField(null=True, blank=True)
     canceled_at = models.DateTimeField(null=True, blank=True)
     activated_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
@@ -605,11 +611,11 @@ class Subscription(models.Model, ChargifyBaseModel):
 
     total_revenue = models.DecimalField(decimal_places = 2, max_digits = 15, default=Decimal('0.00'))
 
-    
+
     def get_amount(self):
         return self.product.price
 
-    
+
     def __unicode__(self):
         s = unicode(self.get_state_display())
         if self.product:
@@ -724,7 +730,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             log.debug("cant get customer. will create new one! ")
             c = Customer()
             c = c.load(api.customer)
-            
+
         self.customer = c
 
         try:
@@ -740,10 +746,10 @@ class Subscription(models.Model, ChargifyBaseModel):
         # aganzha ????
         # credit_card = CreditCard()
         # credit_card.load(api.credit_card, commit=commit)
-        # self.credit_card = credit_card        
+        # self.credit_card = credit_card
         if self.credit_card:
             print "ttttttttttttttttttttttt"
-            print self.credit_card.chargify_id, self.credit_card.id            
+            print self.credit_card.chargify_id, self.credit_card.id
             self.credit_card.load(api.credit_card)
             # credit_card = self.credit_card
         else:
@@ -775,7 +781,7 @@ class Subscription(models.Model, ChargifyBaseModel):
     def preview_migration(self, product):
         return self.api.preview_migration(product.handle)
 
-    def migrate(self, product):        
+    def migrate(self, product):
         return self.update(self.api.migrate(product.handle))
 
     def upgrade(self, product):
@@ -800,7 +806,7 @@ class Subscription(models.Model, ChargifyBaseModel):
             subscription.customer = self.customer._api('customer_id')
         # aganzha!
         # we sdave subsription with credit card only if user updates his credit card!
-        # if it is, for example, plan upgrade, do not sent credit card!        
+        # if it is, for example, plan upgrade, do not sent credit card!
         print "loooooooooooooooooooooooooooo!", self.credit_card, subscription.credit_card
         if self.credit_card:
             if self.credit_card.chargify_id:
@@ -809,3 +815,77 @@ class Subscription(models.Model, ChargifyBaseModel):
                 subscription.credit_card = self.credit_card._api('credit_card_attributes')
         return subscription
     api = property(_api)
+
+class Transaction(models.Model):
+    chargify_id = models.IntegerField(null=True, blank=True, unique=True)
+    type = models.CharField(max_length=16,db_index=True)
+    kind = models.CharField(max_length=16, null=True, blank=True)
+    success = models.BooleanField()
+    amount_in_cents = models.IntegerField(default=0)
+    refunded_amount_in_cents = models.IntegerField(default=0)
+    created_at = models.DateTimeField()
+    customer = models.ForeignKey(Customer,blank=True,null=True)
+    product = models.ForeignKey(Product,blank=True,null=True)
+    subscription = models.ForeignKey(Subscription,blank=True,null=True)
+    memo = models.TextField(blank=True, null=True)
+    dump = models.TextField(blank=True, null=True)
+
+
+    @classmethod
+    def load_for_sub(cls, subscription):
+        host = settings.CHARGIFY_SUBDOMAIN + ".chargify.com"
+        url = 'https://{}/subscriptions/{}/transactions.json'.format(host,subscription.chargify_id)
+        r = requests.get(url, data={},auth=HTTPBasicAuth(settings.CHARGIFY_API_KEY, 'x'))
+        js = json.loads(r.text)
+        for el in js:
+            tr = cls.from_json(el.get('transaction'))
+            tr.save()
+            log.info(u'Saved transaction {} for sub: {}, customer: {}'.format(tr.chargify_id,tr.subscription,tr.customer))
+
+    @classmethod
+    def load_all(cls, min_id,page_size):
+        host = settings.CHARGIFY_SUBDOMAIN + ".chargify.com"
+        url = 'https://{}/transactions.json'.format(host)
+        r = requests.get(url, data={'since_id':min_id,'per_page':page_size,'direction':'asc'},auth=HTTPBasicAuth(settings.CHARGIFY_API_KEY, 'x'))
+        js = json.loads(r.text)
+        for el in js:
+            print "cycle"
+            tr = cls.from_json(el.get('transaction'))
+            tr.save()
+            log.info(u'Saved transaction {} for sub: {}, customer: {}'.format(tr.chargify_id,tr.subscription,tr.customer))
+            yield tr
+
+    @classmethod
+    def from_json(cls,js):
+        try:
+            tr = cls.objects.get(chargify_id=js.get('id'))
+        except ObjectDoesNotExist:
+            tr = Transaction()
+            tr.chargify_id = js.get('id')
+        tr.customer = None
+        if 'customer_id' in js:
+            try:
+                tr.customer = Customer.objects.get(chargify_id=js.get('customer_id'))
+            except ObjectDoesNotExist:
+                log.debug(u'No customer {} for transaction {}'.format(js.get('customer_id'),tr.chargify_id))
+
+        tr.subscription = None
+        if 'subscription_id' in js:
+            try:
+                tr.subscription = Subscription.objects.get(chargify_id=js.get('subscription_id'))
+            except ObjectDoesNotExist:
+                log.debug(u'No subscription for {} for transaction {}'.format(js.get('subscription_id'),tr.chargify_id))
+        tr.product = None
+        if 'product_id' in js:
+            try:
+                tr.product = Product.objects.get(chargify_id=js.get('product_id'))
+            except ObjectDoesNotExist:
+                log.debug(u'No subscription for {} for transaction {}'.format(js.get('subscription_id'),tr.chargify_id))
+        tr.amount_in_cents = js.get('amount_in_cents')
+        tr.refunded_amount_in_cents = js.get('refunded_amount_in_cents',0)
+        tr.created_at = dateutil.parser.parse(js.get('created_at'))
+        tr.type = js.get('type')
+        tr.kind = js.get('kind')
+        tr.dump = json.dumps(js)
+        tr.memo = js.get('memo')
+        return tr
