@@ -820,7 +820,7 @@ class Transaction(models.Model):
     chargify_id = models.IntegerField(null=True, blank=True, unique=True)
     type = models.CharField(max_length=32,db_index=True)
     kind = models.CharField(max_length=32, null=True, blank=True)
-    success = models.BooleanField(null=True)
+    success = models.NullBooleanField()
     amount_in_cents = models.IntegerField(default=0)
     refunded_amount_in_cents = models.IntegerField(default=0)
     created_at = models.DateTimeField()
