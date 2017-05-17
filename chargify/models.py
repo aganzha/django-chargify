@@ -888,5 +888,5 @@ class Transaction(models.Model):
         tr.kind = js.get('kind')
         tr.dump = json.dumps(js)
         tr.memo = js.get('memo')
-        tr.success = js.get('success')
+        tr.success = js.get('success', False)
         return tr
