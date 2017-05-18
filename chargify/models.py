@@ -835,7 +835,7 @@ class Transaction(models.Model):
     def load_for_sub(cls, subscription):
         host = settings.CHARGIFY_SUBDOMAIN + ".chargify.com"
         url = 'https://{}/subscriptions/{}/transactions.json'.format(host,subscription.chargify_id)
-        r = requests.get(url, data={},auth=HTTPBasicAuth(settings.CHARGIFY_API_KEY, 'x'))
+        r = requests.get(url, data={'per_page':1000},auth=HTTPBasicAuth(settings.CHARGIFY_API_KEY, 'x'))
         js = json.loads(r.text)
         for el in js:
             tr = cls.from_json(el.get('transaction'))
