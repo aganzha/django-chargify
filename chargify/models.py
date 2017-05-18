@@ -241,7 +241,7 @@ class Customer(models.Model, ChargifyBaseModel):
             except:
                 user = User(first_name = api.first_name, last_name = api.last_name, email = api.email, username = api.email)
                 # aganzha
-                log.error('New user just created for subscription!: %s' %(user))
+                log.debug('New user just created for subscription!: %s' %(user))
                 user.save()
             customer.user = user
         customer.organization = api.organization
