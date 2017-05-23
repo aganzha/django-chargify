@@ -829,8 +829,9 @@ class Transaction(models.Model):
     subscription = models.ForeignKey(Subscription,blank=True,null=True)
     memo = models.TextField(blank=True, null=True)
     dump = models.TextField(blank=True, null=True)
-
-
+    parent_account = models.CharField(max_length=32,db_index=True,blank=True, null=True)
+    sub_account = models.CharField(max_length=32,db_index=True,blank=True, null=True)
+    
     @classmethod
     def load_for_sub(cls, subscription):
         host = settings.CHARGIFY_SUBDOMAIN + ".chargify.com"
