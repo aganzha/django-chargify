@@ -886,6 +886,8 @@ class Transaction(models.Model):
         tr.refunded_amount_in_cents = js.get('refunded_amount_in_cents',0)
         tr.created_at = dateutil.parser.parse(js.get('created_at'))
         tr.type = js.get('type')
+        if tr.type == 'Refund':
+            tr.amount_in_cents = 0 - tr.amount_in_cents
         tr.kind = js.get('kind')
         tr.dump = json.dumps(js)
         tr.memo = js.get('memo')
